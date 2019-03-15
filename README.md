@@ -7,6 +7,13 @@ PowerShell Functions to query the [Microsoft Graph API](https://developer.micros
 
 Note that these functions run on the Microsoft Graph beta endpoint by default. For version 1, specify the -apiVersion "v1.0" switch.
 
+## Installing MSGraphFunctions
+
+```powershell
+# Install MSGraphFunctions from the PowerShell Gallery
+Install-Module -Name MSGraphFunctions
+```
+
 ## Prerequisites
 - Requires Azure AD Module installed.
 
