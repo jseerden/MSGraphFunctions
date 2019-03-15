@@ -1,4 +1,8 @@
 # MSGraphFunctions
+
+![PowerShell Gallery](https://img.shields.io/powershellgallery/v/MSGraphFunctions.svg?label=PSGallery%20Version&logo=PowerShell&style=flat-square)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/MSGraphFunctions.svg?label=PSGallery%20Downloads&logo=PowerShell&style=flat-square)
+
 PowerShell Functions to query the [Microsoft Graph API](https://developer.microsoft.com/en-us/graph).
 
 Note that these functions run on the Microsoft Graph beta endpoint by default. For version 1, specify the -apiVersion "v1.0" switch.
