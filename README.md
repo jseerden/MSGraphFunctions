@@ -21,7 +21,8 @@ Install-Module -Name MSGraphFunctions
 ```powershell
 Import-Module MSGraphFunctions
 
-Connect-Graph
+$Credential = Get-Credential
+Connect-Graph -Credential $Credential
 ```
 
 ## Examples

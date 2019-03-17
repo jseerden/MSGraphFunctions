@@ -14,7 +14,7 @@ function Connect-Graph() {
     #>
     [cmdletbinding()]
     param(
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $true)]
         [PSCredential]$Credential,
 
         [Parameter(Mandatory = $false)]
