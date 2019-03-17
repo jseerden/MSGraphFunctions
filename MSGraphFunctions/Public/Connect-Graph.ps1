@@ -7,13 +7,18 @@ function Connect-Graph() {
             which is included in the AzureAD PowerShell Module.
 
             https://developer.microsoft.com/en-us/graph/docs/concepts/auth_overview
-        .PARAMETER Username
-            User authenticating to Microsoft Graph
+        .PARAMETER Credential
+            User Credentials authenticating to Microsoft Graph
+        .PARAMETER ClientId
+            ClientID of Azure AD Application with permissions for Microsoft Graph
     #>
     [cmdletbinding()]
     param(
-        [Parameter(Mandatory = $true)]
-        [string]$Username
+        [Parameter(Mandatory = $false)]
+        [PSCredential]$Credential,
+
+        [Parameter(Mandatory = $false)]
+        [string]$ClientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547"
     )
 
     process {
@@ -40,10 +45,11 @@ function Connect-Graph() {
             $null = [System.Reflection.Assembly]::LoadFrom($adal)
             $null = [System.Reflection.Assembly]::LoadFrom($adalForms)
 
-            $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $username).Host
+            if (-not ($Credential)) {
+                $Credential = Get-Credential
+            }
 
-            $clientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547"
-            $redirectUri = "urn:ietf:wg:oauth:2.0:oob"
+            $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Credential.Username).Host
             $resourceAppIdUri = "https://graph.microsoft.com"
             $authority = "https://login.microsoftonline.com/$tenant"
 
@@ -51,12 +57,9 @@ function Connect-Graph() {
 
             # https://msdn.microsoft.com/en-us/library/azure/microsoft.identitymodel.clients.activedirectory.promptbehavior.aspx
             # Change the prompt behaviour to force credentials each time: Auto, Always, Never, RefreshSession
-            $platformParameters = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.PlatformParameters" -ArgumentList "Auto"
-
-            $userId = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.UserIdentifier" -ArgumentList ($username, "OptionalDisplayableId")
-
-            $authResult = $authContext.AcquireTokenAsync($resourceAppIdURI, $clientId, $redirectUri, $platformParameters, $userId).Result
-
+            $userCredentials = New-Object Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential -ArgumentList $Credential.Username, $Credential.Password
+            $authResult = [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions]::AcquireTokenAsync($authContext, $resourceAppIdURI, $clientid, $userCredentials).Result
+            
             # If the accesstoken is valid then create the authentication header
             if($authResult.AccessToken) {
                 # Creating header for Authorization token
@@ -75,12 +78,7 @@ function Connect-Graph() {
         }
         catch {
             $Script:moduleScopeGraphAuthHeader = $null
-            $streamReader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-            $streamReader.BaseStream.Position = 0
-            $streamReader.DiscardBufferedData()
-            $responseBody = $streamReader.ReadToEnd()
-
-            Write-Error "Request to $($_.Exception.Response.ResponseUri) failed with HTTP Status $($_.Exception.Response.StatusCode) $($_.Exception.Response.StatusDescription). `nResponse content: `n$responseBody"
+            Write-Error $_
         }
     }
 }
