@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2019-04-11
+### Added
+- Get-GraphGroupPolicyConfiguration Function
+- Get-GraphGroupPolicyConfigurationAssignment Function
+- Get-GraphGroupPolicyDefinition Function
+- Get-GraphGroupPolicyDefinitionValue Function
+- Get-GraphGroupPolicyPresentationValue Function
+- Remove-GraphGroupPolicyConfiguration Function
+
 ## [2.1.0] - 2019-03-26
 ### Added
 - Get-GraphManagedDevice Function to retrieve Intune Managed Device objects
