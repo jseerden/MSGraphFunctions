@@ -14,7 +14,10 @@ function Connect-Graph() {
     #>
     [cmdletbinding()]
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
+        [string]$Username,
+
+        [Parameter(Mandatory = $false)]
         [PSCredential]$Credential,
 
         [Parameter(Mandatory = $false)]
@@ -23,6 +26,10 @@ function Connect-Graph() {
 
     process {
         try {
+            if (!($Username) -and !($Credential)) {
+                $Username = Read-Host "Enter the Username to connect to Microsoft Graph"
+            }
+
             # Load DLLs
             $azureADModule = Get-Module -Name "AzureAD" -ListAvailable
             if ($null -eq $azureADModule) {
@@ -45,21 +52,30 @@ function Connect-Graph() {
             $null = [System.Reflection.Assembly]::LoadFrom($adal)
             $null = [System.Reflection.Assembly]::LoadFrom($adalForms)
 
-            if (-not ($Credential)) {
-                $Credential = Get-Credential
+            if ($Credential) {
+                $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Credential.Username).Host
+            }
+            else {
+                $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Username).Host
             }
 
-            $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Credential.Username).Host
             $resourceAppIdUri = "https://graph.microsoft.com"
             $authority = "https://login.microsoftonline.com/$tenant"
 
             $authContext = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext" -ArgumentList $authority
 
-            # https://msdn.microsoft.com/en-us/library/azure/microsoft.identitymodel.clients.activedirectory.promptbehavior.aspx
-            # Change the prompt behaviour to force credentials each time: Auto, Always, Never, RefreshSession
-            $userCredentials = New-Object Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential -ArgumentList $Credential.Username, $Credential.Password
-            $authResult = [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions]::AcquireTokenAsync($authContext, $resourceAppIdURI, $clientid, $userCredentials).Result
-            
+            if ($Credential) {
+                $userCredentials = New-Object Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential -ArgumentList $Credential.Username, $Credential.Password
+                $authResult = [Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions]::AcquireTokenAsync($authContext, $resourceAppIdURI, $clientid, $userCredentials).Result
+            }
+            else {
+                # https://msdn.microsoft.com/en-us/library/azure/microsoft.identitymodel.clients.activedirectory.promptbehavior.aspx
+                # Change the prompt behaviour to force credentials each time: Auto, Always, Never, RefreshSession
+                $platformParameters = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.PlatformParameters" -ArgumentList "Auto"
+                $userId = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.UserIdentifier" -ArgumentList ($username, "OptionalDisplayableId")
+                $authResult = $authContext.AcquireTokenAsync($resourceAppIdURI, $clientId, $redirectUri, $platformParameters, $userId, "prompt=admin_consent").Result
+            }
+
             # If the accesstoken is valid then create the authentication header
             if($authResult.AccessToken) {
                 # Creating header for Authorization token
