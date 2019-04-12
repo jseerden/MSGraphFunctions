@@ -7,8 +7,12 @@ function Connect-Graph() {
             which is included in the AzureAD PowerShell Module.
 
             https://developer.microsoft.com/en-us/graph/docs/concepts/auth_overview
+        .PARAMETER Username
+            Username of user authenticating to Microsoft Graph (Interactive Authentication)
         .PARAMETER Credential
-            User Credentials authenticating to Microsoft Graph
+            User Credentials authenticating to Microsoft Graph (Non-interactive Authentication)
+        .PARAMETER AdminConsent
+            Administrator Consent for "Microsoft Intune PowerShell" permissions
         .PARAMETER ClientId
             ClientID of Azure AD Application with permissions for Microsoft Graph
     #>
@@ -19,6 +23,9 @@ function Connect-Graph() {
 
         [Parameter(Mandatory = $false)]
         [PSCredential]$Credential,
+
+        [Parameter(Mandatory = $false)]
+        [bool]$AdminConsent = $false,
 
         [Parameter(Mandatory = $false)]
         [string]$ClientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547"
@@ -73,7 +80,14 @@ function Connect-Graph() {
                 # Change the prompt behaviour to force credentials each time: Auto, Always, Never, RefreshSession
                 $platformParameters = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.PlatformParameters" -ArgumentList "Auto"
                 $userId = New-Object "Microsoft.IdentityModel.Clients.ActiveDirectory.UserIdentifier" -ArgumentList ($username, "OptionalDisplayableId")
-                $authResult = $authContext.AcquireTokenAsync($resourceAppIdURI, $clientId, $redirectUri, $platformParameters, $userId, "prompt=admin_consent").Result
+
+                $redirectUri = "urn:ietf:wg:oauth:2.0:oob"
+                if ($AdminConsent) {
+                    $authResult = $authContext.AcquireTokenAsync($resourceAppIdURI, $clientId, $redirectUri, $platformParameters, $userId, "prompt=admin_consent").Result
+                }
+                else {
+                    $authResult = $authContext.AcquireTokenAsync($resourceAppIdURI, $clientId, $redirectUri, $platformParameters, $userId).Result
+                }
             }
 
             # If the accesstoken is valid then create the authentication header
