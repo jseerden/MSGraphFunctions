@@ -21,6 +21,13 @@ Install-Module -Name MSGraphFunctions
 ```powershell
 Import-Module MSGraphFunctions
 
+# Authenticate for the first time and grant permissions for the "Microsoft Intune PowerShell" Enterprise Application. (Interactive Authentication (Supports MFA))
+Connect-Graph -AdminConsent $true
+
+# Interactive Authentication (Supports MFA)
+Connect-Graph
+
+# Non Interactive Authentication (Supports Automation Goals)
 $Credential = Get-Credential
 Connect-Graph -Credential $Credential
 ```
