@@ -23,8 +23,13 @@ function Get-GraphUsersLoggedOn() {
     if ($usersLoggedOn) {
         foreach ($user in $usersLoggedOn) { 
             $userLoggedOn = Get-GraphAzureADUser -Id $user.userId
-            $lastLogonDateTime = Get-Date $user.lastLogonDateTime
-            Write-Output "$($managedDevice.deviceName) ($($managedDevice.id)) - User $($userLoggedOn.displayName) ($($userLoggedOn.userPrincipalname)) logged on at $lastLogonDatetime"
+            New-Object PSCustomObject -Property @{
+                'deviceName'  = $managedDevice.deviceName
+                'id' = $managedDevice.id
+                'userDisplayName' = $userLoggedOn.displayName
+                'userPrincipalName' = $userLoggedOn.userPrincipalname
+                'lastLogonDateTime' = Get-Date -Date $user.lastLogonDateTime
+            }
         }
     }
     else {
