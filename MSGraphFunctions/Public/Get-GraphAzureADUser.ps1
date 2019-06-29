@@ -1,21 +1,21 @@
-function Get-GraphAzureADGroup() {
+function Get-GraphAzureADUser() {
     <#
         .SYNOPSIS
-            Get Azure AD Groups through Microsoft Graph
+            Get Azure AD Users through Microsoft Graph
         .DESCRIPTION
-            https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/group_get
-            https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/group_list
-        .PARAMETER GroupName
-            If exists, a single group matching groupName will be returned
+            https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-beta&
+            https://docs.microsoft.com/en-us/graph/api/user-list?view=graph-rest-beta
+        .PARAMETER Id
+            Id or UserPrincipalName of the Azure AD User Object
         .PARAMETER All
-            If set to $true, all groups in AzureAD will be returned. By default this is limited to 999 (Microsoft Graph Paging is limited to 999 results)
+            If set to $true, all users in AzureAD will be returned. By default this is limited to 999 (Microsoft Graph Paging is limited to 999 results)
         .PARAMETER ApiVersion
             API version to query
     #>
     [cmdletbinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [string]$GroupName,
+        [string]$Id,
 
         [Parameter(Mandatory = $false)]
         [bool]$All = $false,
@@ -35,19 +35,21 @@ function Get-GraphAzureADGroup() {
                 Write-Output "Connect to Microsoft Graph using Connect-Graph first."
             }
             
-            # Return a specific group
-            if ($groupName) {
-                $uri = "https://graph.microsoft.com/$apiVersion/groups?%24filter=displayName%20eq%20'$groupName'"
+            # Return a specific user
+            if ($id) {
+                $uri = "https://graph.microsoft.com/$apiVersion/users/$id"
+                $query = Invoke-RestMethod -Uri $uri -Headers $authHeader -Method Get -ErrorAction Stop
+                return $query
             }
-            # Return up to 999 groups (limited to 999 in a single query)
+            # Return up to 999 users (limited to 999 in a single query)
             else {
-                $uri = "https://graph.microsoft.com/$apiVersion/groups?`$top=999"
+                $uri = "https://graph.microsoft.com/$apiVersion/users?`$top=999"
             }
 
             $query = Invoke-RestMethod -Uri $uri -Headers $authHeader -Method Get -ErrorAction Stop
             $value = $query.Value
                     
-            # Return all groups
+            # Return all users
             if ($all) {
                 if ($query.'@odata.nextLink') {
                     do {
