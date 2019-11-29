@@ -15,6 +15,8 @@ function Connect-Graph() {
             Administrator Consent for "Microsoft Intune PowerShell" permissions
         .PARAMETER ClientId
             ClientID of Azure AD Application with permissions for Microsoft Graph
+        .PARAMETER Tenant
+            Tenant Name or ID, by default the primary tenant is used, use this to specify the specify the required B2B tenant
     #>
     [cmdletbinding()]
     param(
@@ -28,7 +30,10 @@ function Connect-Graph() {
         [bool]$AdminConsent = $false,
 
         [Parameter(Mandatory = $false)]
-        [string]$ClientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547"
+        [string]$ClientId = "d1ddf0e4-d672-4dae-b554-9d5bdfd93547",
+
+        [Parameter(Mandatory = $false)]
+        [string]$Tenant
     )
 
     process {
@@ -59,12 +64,17 @@ function Connect-Graph() {
             $null = [System.Reflection.Assembly]::LoadFrom($adal)
             $null = [System.Reflection.Assembly]::LoadFrom($adalForms)
 
-            if ($Credential) {
-                $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Credential.Username).Host
+            if ([string]::IsNullOrEmpty($Tenant))
+            {
+                if ($Credential) {
+                    $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Credential.Username).Host
+                }
+                else {
+                    $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Username).Host
+                }
             }
-            else {
-                $tenant = (New-Object "System.Net.Mail.MailAddress" -ArgumentList $Username).Host
-            }
+
+            Write-Verbose "TenantID = $tenant"
 
             $resourceAppIdUri = "https://graph.microsoft.com"
             $authority = "https://login.microsoftonline.com/$tenant"
