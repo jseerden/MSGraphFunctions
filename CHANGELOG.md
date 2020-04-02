@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2020-3-4
+### Added
+- New functions to retrieve Endpoint Security configuration details and create them
+  - Get-GraphDeviceManagementIntent Function
+  - Get-GraphDeviceManagementIntentSettingValue Function
+  - Get-GraphDeviceManagementSettingDefinition Function
+  - Get-GraphDeviceManagementTemplate Function
+  - Get-GraphDeviceManagementTemplateSettingCategory Function
+  - New-GraphDeviceManagementTemplateInstance Function
+
 ## [2.4.1] - 2019-6-30
 ### Changed
 - Get-GraphUsersLoggedOn now outputs to a PSCustomObject instead of a string
