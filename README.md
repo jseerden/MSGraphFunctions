@@ -1,3 +1,6 @@
+# 6/25/20: MSGraphFunctions is no longer maintained
+This PowerShell Module has once been created for the IntuneBackupAndRestore PowerShell Module to function. As of the version 2.0.0 release of that module, it has been rewritten to use the Microsoft.Graph.Intune PowerShell Module instead. Now that the MSGraphFunctions PowerShell module is no longer a prerequisite, it is also no longer maintained by the author.
+
 # MSGraphFunctions
 
 ![PowerShell Gallery](https://img.shields.io/powershellgallery/v/MSGraphFunctions.svg?label=PSGallery%20Version&logo=PowerShell&style=flat-square)
